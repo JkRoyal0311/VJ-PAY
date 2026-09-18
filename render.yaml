@@ -32,8 +32,21 @@ services:
   - type: web
     name: vjpay-frontend
     plan: free
-    buildCommand: cd frontend && npm install && npm run build -- --configuration production
+    buildCommand: |
+      cd frontend
+      sed -i "s|const customApiUrl: string = '';|const customApiUrl: string = '${BACKEND_URL}';|g" src/environments/environment.ts
+      npm install
+      npm run build -- --configuration production
     staticPublishPath: ./frontend/dist/vjpay/browser
     envVars:
       - key: NODE_VERSION
         value: "20"
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: vjpay-backend
+          envVarKey: RENDER_EXTERNAL_URL
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
