@@ -124,6 +124,11 @@ public class CustomerController
 		return new ResponseEntity<> (customer, HttpStatus.OK);
 	}
 	
+	@GetMapping("/auth/health")
+	public ResponseEntity<String> healthCheck() {
+		return new ResponseEntity<>("OK", HttpStatus.OK);
+	}
+	
 	@PutMapping("/admin/customers/{customerId}")
 	public ResponseEntity<CustomerDto> updateCustomer(@RequestBody Customer customer, @PathVariable long customerId)
 	{

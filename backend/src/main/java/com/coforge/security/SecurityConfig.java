@@ -41,7 +41,8 @@ public class SecurityConfig
                 "/customers/send-otp",
                 "/customers/verify-otp",
                 "/customers/forget-password",
-                "/api/payment/**"
+                "/api/payment/**",
+                "/auth/health"
             ).permitAll()
             .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
