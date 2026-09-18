@@ -1,0 +1,91 @@
+<div>
+  <div class="mb-8">
+    <h1 class="page-title">Bill Payments</h1>
+    <p class="page-subtitle">All bill payments across the platform</p>
+  </div>
+
+  @if (successMsg) { <div class="alert-success">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error">{{ error }}</div> }
+
+  <div class="glass-card rounded-2xl p-5 mb-6">
+    <div class="flex gap-4 w-full items-center">
+      <div class="w-full">
+        <input type="text" class="input-dark w-full py-2 text-sm" name="query" placeholder="Enter your query here..." [(ngModel)]="query">
+      </div>
+      <div class="flex gap-2">
+        <button (click)="search()" class="btn-primary !py-2 !px-4 !text-sm">Search</button>
+        <button (click)="clearFilter()" class="btn-ghost !py-2 !px-4 !text-sm">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="glass-card rounded-2xl p-5 mb-6">
+    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Filters</p>
+    <div class="flex flex-wrap gap-4 items-end">
+      <div>
+        <label class="label">Bill Type</label>
+        <select [(ngModel)]="filterType" class="input-dark !py-2 !text-sm">
+          <option value="" class="bg-white text-slate-800">All Types</option>
+          @for (t of billTypes; track t) {
+            <option [value]="t" class="bg-white text-slate-800">{{ t }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="label">Start Date</label>
+        <input type="date" [(ngModel)]="filterStart" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div>
+        <label class="label">End Date</label>
+        <input type="date" [(ngModel)]="filterEnd" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div class="flex gap-2">
+        <button (click)="applyFilter()" class="btn-primary !py-2 !px-4 !text-sm">Apply</button>
+        <button (click)="clearFilter()" class="btn-ghost !py-2 !px-4 !text-sm">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="flex items-center justify-center h-48">
+      <div class="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  } @else if (bills.length === 0) {
+    <div class="glass-card rounded-2xl p-12 text-center">
+      <p class="text-slate-400">No bill payments found.</p>
+    </div>
+  } @else {
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800/60">
+        <p class="text-sm font-semibold text-white">{{ bills.length }} payment{{ bills.length === 1 ? '' : 's' }}</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-800/60">
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">ID</th>
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</th>
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Amount</th>
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
+              <!-- <th class="text-right px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Action</th> -->
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/40">
+            @for (bill of bills; track bill.billId) {
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="px-6 py-4 text-slate-500 font-mono text-xs">#{{ bill.billId }}</td>
+                <td class="px-6 py-4"><span [class]="billTypeBadge(bill.billType)">{{ bill.billType }}</span></td>
+                <td class="px-6 py-4 font-semibold text-white">₹{{ bill.amount | number:'1.2-2' }}</td>
+                <td class="px-6 py-4 text-slate-400 text-xs">{{ bill.paymentDate | date:'mediumDate' }}</td>
+                <!-- <td class="px-6 py-4 text-right">
+                  <button (click)="delete(bill.billId)" class="btn-danger">Delete</button>
+                </td> -->
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

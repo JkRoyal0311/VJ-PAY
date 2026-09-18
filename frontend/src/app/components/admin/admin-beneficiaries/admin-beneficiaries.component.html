@@ -1,0 +1,50 @@
+<div>
+  <div class="mb-8">
+    <h1 class="page-title">Beneficiaries</h1>
+    <p class="page-subtitle">All beneficiaries across the platform</p>
+  </div>
+
+  @if (successMsg) { <div class="alert-success">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error">{{ error }}</div> }
+
+  <!-- Filter by customer -->
+  <div class="glass-card rounded-2xl p-4 mb-6 flex gap-3">
+    <input type="number" [(ngModel)]="filterCustomerId" placeholder="Filter by Customer ID..."
+      (keyup.enter)="filterByCustomer()" class="input-dark flex-1 !py-2" />
+    <button (click)="filterByCustomer()" class="btn-primary !py-2 !px-5 flex-shrink-0">Filter</button>
+    <button (click)="filterCustomerId=''; load()" class="btn-ghost !py-2 !px-4 flex-shrink-0">Clear</button>
+  </div>
+
+  @if (loading) {
+  <div class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+  } @else if (beneficiaries.length === 0) {
+  <div class="glass-card rounded-2xl p-12 text-center">
+    <p class="text-slate-400">No beneficiaries found.</p>
+  </div>
+  } @else {
+  <div class="glass-card rounded-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-800/60">
+      <p class="text-sm font-semibold text-sky-700">{{ beneficiaries.length }} beneficiar{{ beneficiaries.length === 1 ?
+        'y' : 'ies' }}</p>
+    </div>
+    <ul class="divide-y divide-slate-800/40">
+      @for (b of beneficiaries; track b.beneficiaryId) {
+      <li class="flex items-center gap-4 px-6 py-4 hover:bg-slate-800/30 transition">
+        <div
+          class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
+          {{ b.beneficiaryName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-cyan-600">{{ b.beneficiaryName }}</p>
+          <p class="text-xs text-slate-400 font-mono">{{ b.mobileNumber }}</p>
+        </div>
+        <span class="text-xs text-slate-500 font-mono mr-4">#{{ b.beneficiaryId }}</span>
+        <button (click)="delete(b.beneficiaryId)" class="btn-danger flex-shrink-0">Delete</button>
+      </li>
+      }
+    </ul>
+  </div>
+  }
+</div>

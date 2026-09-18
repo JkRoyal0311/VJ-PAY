@@ -1,0 +1,184 @@
+<div>
+  <div class="flex items-start justify-between mb-8 animate-slide-up">
+    <div>
+      <h1 class="page-title">📋 Bill Payments</h1>
+      <p class="page-subtitle">Pay and track your utility bills</p>
+    </div>
+    <button (click)="showForm = !showForm" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+      Pay Bill
+    </button>
+  </div>
+
+  @if (successMsg) { <div class="alert-success animate-slide-down">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error animate-slide-down">{{ error }}</div> }
+
+  @if (showForm) {
+  <div class="glass-card-static rounded-2xl p-6 mb-6 animate-slide-down">
+    <h3 class="text-sm font-semibold text-white mb-5 flex items-center gap-2"><span>💳</span> New Bill Payment</h3>
+    <form #billForm=ngForm (ngSubmit)="createBill()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">Bill Type</label>
+        <select [(ngModel)]="form.billType" name="billType" class="input-dark">
+          @for (type of billTypes; track type) {
+          <option [value]="type" class="bg-white text-slate-800">{{ type }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="label">Amount (₹)</label>
+        <input type="number" #amount="ngModel" [(ngModel)]="form.amount" name="amount" min="1" required placeholder="350" class="input-dark" />
+        <div *ngIf="amount.invalid && amount.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="amount.errors?.['required']">Amount is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="amount.errors?.['min']">Amount should be greater than 0</small>
+        </div>
+      </div>
+      @if(form.billType=="ELECTRICITY"){
+      <div>
+        <label class="label">State</label>
+        <input type="text" #state="ngModel" [(ngModel)]="electricityBookingBillData.state" name="electricityBookingBillData.state" placeholder="e.g. Uttar Pradesh" class="input-dark" required pattern="[A-Za-z]{3,}[A-Za-z\s]*" />
+        <div *ngIf="state.invalid && state.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="state.errors?.['required']">State is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="state.errors?.['pattern']">State should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Biller Name</label>
+        <input type="text" required pattern="[a-zA-Z]{2}[a-zA-Z\s]{0,20}[a-zA-Z]" #billerName="ngModel" [(ngModel)]="electricityBookingBillData.billerName" name="electricityBookingBillData.billerName" placeholder="e.g UPPCCL" class="input-dark" />
+        <div *ngIf="billerName.invalid && billerName.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="billerName.errors?.['required']">Biller Name is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="billerName.errors?.['pattern']">Biller Name should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Account Number</label>
+        <input type="number" required pattern="[1-9][0-9]{8,}" #accountNumber="ngModel" min="99999999" [(ngModel)]="electricityBookingBillData.accountNumber" name="electricityBookingBillData.accountNumber" placeholder="e.g. 678878" class="input-dark" />
+        <div *ngIf="accountNumber.invalid && accountNumber.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="accountNumber.errors?.['required']">Account Number is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="accountNumber.errors?.['pattern']">Account Number should be valid</small>
+        </div>
+      </div>
+      }
+      @if(form.billType=="MOBILE_RECHARGE"){
+      <div>
+        <label class="label">Mobile Number</label>
+        <input type="text" [(ngModel)]="mobileRechargeBillData.mobileNumber" #mobileNumber="ngModel" pattern="[6-9][0-9]{9}" required name="mobileRechargeBillData.mobileNumber" placeholder="e.g. 8899889988" class="input-dark" />
+        <div *ngIf="mobileNumber.invalid && mobileNumber.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="mobileNumber.errors?.['required']">Mobile Number is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="mobileNumber.errors?.['pattern']">Mobile Number should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Operator</label>
+        <select [(ngModel)]="mobileRechargeBillData.operator" name="mobileRechargeBillData.operator" class="input-dark">
+          <option *ngFor="let operator of mobileRechargeOperators" [value]="operator" class="bg-white text-slate-800">{{ operator }}</option>
+        </select>
+      </div>
+      }
+      @if(form.billType=="GAS_BOOKING"){
+      <div>
+        <label class="label">Gas Provider</label>
+        <input type="text" #gasProvider="ngModel" required pattern="[a-zA-Z][a-zA-Z][a-zA-Z\s]{0,20}[a-zA-Z]" [(ngModel)]="gasCylinderBookingBillData.gasProvider" name="gasCylinderBookingBillData.gasProvider" placeholder="e.g. Indane" class="input-dark" />
+        <div *ngIf="gasProvider.invalid && gasProvider.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="gasProvider.errors?.['required']">Gas Provider is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="gasProvider.errors?.['pattern']">Gas Provider should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Customer Number</label>
+        <input type="text" pattern="[1-9][0-9]{9,}" [(ngModel)]="gasCylinderBookingBillData.customerNumber" #customerNumber="ngModel" required name="gasCylinderBookingBillData.customerNumber" placeholder="e.g 788667868" class="input-dark" />
+        <div *ngIf="customerNumber.invalid && customerNumber.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="customerNumber.errors?.['required']">Customer Number is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="customerNumber.errors?.['pattern']">Customer Number should be valid</small>
+        </div>
+      </div>
+      }
+      <div class="md:col-span-2 flex gap-3 pt-2">
+        <button type="submit" class="btn-primary" [disabled]="billForm.invalid">Pay Now</button>
+        <button type="button" (click)="showForm = false" class="btn-ghost" [disabled]="billForm.invalid">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <!-- Filters -->
+  <div class="glass-card-static rounded-2xl p-5 mb-6 animate-slide-up stagger-1">
+    <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--pw-text-secondary);">🔍 Filters</p>
+    <div class="flex flex-wrap gap-4 items-end">
+      <div>
+        <label class="label">Bill Type</label>
+        <select [(ngModel)]="filterType" name="filterType" class="input-dark !py-2 !text-sm">
+          <option value="" class="bg-white text-slate-800">All Types</option>
+          <option [value]="type" class="bg-white text-slate-800" *ngFor="let type of billTypes">{{ type }}</option>
+        </select>
+      </div>
+      <div>
+        <label class="label">From Date</label>
+        <input type="date" [(ngModel)]="filterFrom" name="filterFrom" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div>
+        <label class="label">To Date</label>
+        <input type="date" [(ngModel)]="filterTo" name="filterTo" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div class="flex gap-2">
+        <button (click)="applyFilter()" class="btn-primary !py-2 !px-4 !text-sm">Apply</button>
+        <button (click)="clearFilter()" class="btn-ghost !py-2 !px-4 !text-sm">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+  <div class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+  } @else if (filtered.length === 0) {
+  <div class="glass-card-static rounded-2xl p-12 text-center animate-fade-in">
+    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(20,8,45,0.8);"><span class="text-3xl">📋</span></div>
+    <p class="text-slate-400 font-medium">No bill payments yet</p>
+  </div>
+  } @else {
+  <div class="glass-card-static rounded-2xl overflow-hidden animate-fade-in">
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr style="border-bottom:1px solid rgba(139,92,246,0.08);">
+          <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Bill</th>
+          <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Type</th>
+          <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Amount</th>
+          <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Date</th>
+          <th class="text-right px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (bill of filtered; track bill.billId) {
+        <tr class="hover:bg-violet-500/5 transition" style="border-bottom:1px solid rgba(139,92,246,0.04);">
+          <td class="px-6 py-4 text-slate-500 font-mono text-xs">#{{ bill.billId }}</td>
+          <td class="px-6 py-4"><span [class]="billTypeBadge(bill.billType)">{{ bill.billType }}</span></td>
+          <td class="px-6 py-4 font-semibold text-white">₹{{ bill.amount | number:'1.2-2' }}</td>
+          <td class="px-6 py-4 text-slate-500 text-xs">{{ bill.paymentDate | date:'mediumDate' }}</td>
+          <td class="px-6 py-4 text-right"><button (click)="fetchSingleBillPayment(bill)" class="btn-info">View</button></td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    </div>
+  </div>
+  }
+
+  @if (showSingleBillPayment) {
+  <div class="modal-overlay" (click)="closeSingleBillPayment()">
+    <div class="modal-card !max-w-xl" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" style="font-family:'Outfit',sans-serif;">📋 Bill Details</h3>
+        <button class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center hover:bg-rose-500/20 transition text-sm font-bold" (click)="closeSingleBillPayment()">✕</button>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Type</span><span class="text-white text-sm font-medium">{{singleBillPayment.billType}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Amount</span><span class="text-white text-sm font-bold">₹{{singleBillPayment.amount}}</span></div>
+        <div *ngFor="let col of getColumns(singleBillPayment.billData)" class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm capitalize">{{col}}</span><span class="text-white text-sm">{{singleBillPaymentBillData[col]}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Date</span><span class="text-white text-sm">{{singleBillPayment.paymentDate | date:'mediumDate'}}</span></div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

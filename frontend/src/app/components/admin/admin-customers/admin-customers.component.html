@@ -1,0 +1,99 @@
+<div>
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <h1 class="page-title">Customers</h1>
+      <p class="page-subtitle">Manage all registered customers</p>
+    </div>
+  </div>
+
+  @if (successMsg) { <div class="alert-success">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error">{{ error }}</div> }
+
+  <!-- Search -->
+  <div class="glass-card rounded-2xl p-4 mb-6 flex gap-3">
+    <input type="text" [(ngModel)]="searchQuery" name="search" placeholder="Search by name, email or mobile..."
+      (keyup.enter)="search()" class="input-dark flex-1 !py-2" />
+    <button (click)="search()" class="btn-primary !py-2 !px-5 flex-shrink-0">Search</button>
+    <button (click)="searchQuery=''; load()" class="btn-ghost !py-2 !px-4 flex-shrink-0">Clear</button>
+  </div>
+
+  @if (loading) {
+    <div class="flex items-center justify-center h-48">
+      <div class="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  } @else if (customers.length === 0) {
+    <div class="glass-card rounded-2xl p-12 text-center">
+      <p class="text-slate-400">No customers found.</p>
+    </div>
+  } @else {
+    <div class="glass-card rounded-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800/60">
+        <p class="text-sm font-semibold text-white">{{ customers.length }} customer{{ customers.length === 1 ? '' : 's' }}</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-800/60">
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Id</th>
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Customer</th>
+              <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile</th>
+              <!-- <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Wallet Balance</th> -->
+              <th class="text-right px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/40">
+            @for (c of customers; track c.custId) {
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="px-6 py-4 text-slate-300 font-mono text-xs">{{ c.custId }}</td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                      {{ c.custName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div>
+                      <p class="font-medium text-white">{{ c.custName }}</p>
+                      <p class="text-xs text-slate-400">{{ c.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-slate-300 font-mono text-xs">{{ c.mobileNumber }}</td>
+                <!-- <td class="px-6 py-4 font-semibold text-emerald-400">₹{{ c.wallet?.balance | number:'1.2-2' }}</td> -->
+                <td class="px-6 py-4 text-right flex justify-end gap-2">
+                  <button (click)="openEdit(c)" class="btn-accent">Edit</button>
+                  <button (click)="delete(c.custId)" class="btn-danger">Delete</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Edit Modal -->
+  @if (editModal) {
+    <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div class="glass-card rounded-2xl p-6 w-full max-w-md shadow-2xl">
+        <h3 class="text-lg font-semibold text-white mb-5">Edit Customer</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="label">Full Name</label>
+            <input type="text" [(ngModel)]="editForm.custName" name="custName" class="input-dark" />
+          </div>
+          <div>
+            <label class="label">Mobile Number</label>
+            <input type="text" [(ngModel)]="editForm.mobileNumber" name="mobileNumber" class="input-dark" />
+          </div>
+          <div>
+            <label class="label">Email</label>
+            <input type="email" [(ngModel)]="editForm.email" name="email" class="input-dark" />
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button (click)="saveEdit()" class="btn-primary flex-1 text-center">Save Changes</button>
+          <button (click)="editModal = null" class="btn-ghost flex-1 text-center">Cancel</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

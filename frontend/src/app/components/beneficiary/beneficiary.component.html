@@ -1,0 +1,135 @@
+<div>
+  <div class="flex items-start justify-between mb-8 animate-slide-up">
+    <div>
+      <h1 class="page-title">👥 Beneficiaries</h1>
+      <p class="page-subtitle">People you can send money to</p>
+    </div>
+    <button (click)="showForm = !showForm" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Add Beneficiary
+    </button>
+  </div>
+
+  @if (successMsg) { <div class="alert-success animate-slide-down">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error animate-slide-down">{{ error }}</div> }
+
+  @if (showForm) {
+  <div class="glass-card-static rounded-2xl p-6 mb-6 animate-slide-down">
+    <h3 class="text-sm font-semibold text-white mb-5 flex items-center gap-2"><span>➕</span> New Beneficiary</h3>
+    <form #beneficiaryForm=ngForm (ngSubmit)="addBeneficiary()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">Full Name</label>
+        <input type="text" #beneficiaryName="ngModel" pattern="[a-zA-Z][a-zA-Z][a-zA-Z\s]{0,20}[a-zA-Z]"
+          [(ngModel)]="form.beneficiaryName" name="beneficiaryName" required placeholder="Siva" class="input-dark" />
+        <div *ngIf="beneficiaryName.invalid && beneficiaryName.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="beneficiaryName.errors?.['required']">Beneficiary Name is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="beneficiaryName.errors?.['pattern']">Beneficiary Name should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Mobile Number</label>
+        <input type="number" #mobileNumber="ngModel" pattern="[6-9][0-9]{9}" [(ngModel)]="form.mobileNumber"
+          name="mobileNumber" required placeholder="10-digit number" class="input-dark" />
+        <div *ngIf="mobileNumber.invalid && mobileNumber.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="mobileNumber.errors?.['required']">Mobile Number is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="mobileNumber.errors?.['pattern']">Mobile Number should be valid</small>
+        </div>
+      </div>
+      <div class="md:col-span-2 flex gap-3 pt-2">
+        <button type="submit" class="btn-primary" [disabled]="beneficiaryForm.invalid">Save</button>
+        <button type="button" (click)="showForm = false" class="btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  @if (loading) {
+  <div class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+  } @else if (beneficiaries.length === 0) {
+  <div class="glass-card-static rounded-2xl p-12 text-center animate-fade-in">
+    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+      style="background: rgba(20, 8, 45, 0.8);">
+      <span class="text-3xl">👥</span>
+    </div>
+    <p class="text-slate-400 font-medium">No beneficiaries added yet</p>
+    <p class="text-slate-500 text-sm mt-1">Add people you want to send money to</p>
+  </div>
+  } @else {
+  <div class="glass-card-static rounded-2xl overflow-hidden animate-fade-in">
+    <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid rgba(139, 92, 246, 0.08);">
+      <p class="text-sm font-semibold text-sky-700">{{ beneficiaries.length }} beneficiar{{ beneficiaries.length === 1 ?
+        'y' : 'ies' }}</p>
+    </div>
+    <ul>
+      @for (b of beneficiaries; track b.beneficiaryId; let i = $index) {
+      <li class="flex items-center gap-4 px-6 py-4 hover:bg-violet-500/5 transition animate-slide-up"
+        [style.animation-delay]="(i * 0.05) + 's'" style="border-bottom: 1px solid rgba(139, 92, 246, 0.05);">
+        <div
+          class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0 shadow-md shadow-violet-900/20">
+          {{ b.beneficiaryName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-sky-700">{{ b.beneficiaryName }}</p>
+          <p class="text-xs text-slate-500">📱 {{ b.mobileNumber }}</p>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+          <button (click)="openSend(b)" class="btn-accent">💸 Send</button>
+          <button (click)="delete(b.beneficiaryId)" class="btn-danger">Delete</button>
+        </div>
+      </li>
+      }
+    </ul>
+  </div>
+  }
+
+  <!-- Send Money Modal -->
+  @if (sendModal) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <h3 class="text-lg font-bold text-white mb-1" style="font-family: 'Outfit', sans-serif;">💸 Send Money</h3>
+      <div class="flex items-center gap-3 my-4 p-3 rounded-xl"
+        style="background: rgba(20, 8, 45, 0.8); border: 1px solid rgba(139, 92, 246, 0.1);">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-sm font-bold text-white">
+          {{ sendModal.beneficiaryName.charAt(0) }}
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-white">{{ sendModal.beneficiaryName }}</p>
+          <p class="text-xs text-slate-500">{{ sendModal.mobileNumber }}</p>
+        </div>
+      </div>
+
+      <!-- Quick amount buttons -->
+      <div class="flex gap-2 mb-3">
+        <button type="button" (click)="sendAmount = 100"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹100</button>
+        <button type="button" (click)="sendAmount = 500"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹500</button>
+        <button type="button" (click)="sendAmount = 1000"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹1,000</button>
+        <button type="button" (click)="sendAmount = 2000"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹2,000</button>
+      </div>
+
+      <label class="label">Amount (₹)</label>
+      <input type="number" [(ngModel)]="sendAmount" min="1" placeholder="Enter amount" class="input-dark mb-4" />
+      <div class="flex gap-3">
+        <button (click)="doSend()" class="btn-primary flex-1 text-center">Send</button>
+        <button (click)="sendModal = null" class="btn-ghost flex-1 text-center">Cancel</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

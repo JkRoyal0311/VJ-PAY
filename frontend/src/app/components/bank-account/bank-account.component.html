@@ -1,0 +1,146 @@
+<div>
+  <div class="flex items-start justify-between mb-8 animate-slide-up">
+    <div>
+      <h1 class="page-title">🏦 Bank Accounts</h1>
+      <p class="page-subtitle">Manage your linked bank accounts</p>
+    </div>
+    <button (click)="showForm = !showForm" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Add Account
+    </button>
+  </div>
+
+  @if (successMsg) { <div class="alert-success animate-slide-down">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error animate-slide-down">{{ error }}</div> }
+
+  <!-- Add form -->
+  @if (showForm) {
+  <div class="glass-card-static rounded-2xl p-6 mb-6 animate-slide-down">
+    <h3 class="text-sm font-semibold text-white mb-5 flex items-center gap-2"><span>➕</span> New Bank Account</h3>
+    <form #bankAccountForm=ngForm (ngSubmit)="addAccount()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">Account Number</label>
+        <input type="number" pattern="[1-9][0-9]+" min="999999999" id="accountNo" #accountNo="ngModel"
+          [(ngModel)]="form.accountNo" name="accountNo" required placeholder="123456789012" class="input-dark" />
+        <div *ngIf="accountNo.invalid && accountNo.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="accountNo.errors?.['required']">Account Number is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="accountNo.errors?.['pattern']">Account Number should be in numbers</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="accountNo.errors?.['min']">Account
+            Number should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">IFSC Code</label>
+        <input type="text" [(ngModel)]="form.ifscCode" id="ifscCode" #ifscCode="ngModel" name="ifscCode" required
+          placeholder="SBIN0001234" class="input-dark uppercase" pattern="[A-Z]{4}0[A-Z0-9]{6}" />
+        <div *ngIf="ifscCode.invalid && ifscCode.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="ifscCode.errors?.['required']">IFSC
+            Code is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="ifscCode.errors?.['pattern']">IFSC
+            Code should be valid</small>
+        </div>
+      </div>
+      <div>
+        <label class="label">Bank Name</label>
+        <input type="text" [(ngModel)]="form.bankname" id="bankname" #bankname="ngModel" name="bankname" required
+          placeholder="State Bank of India" class="input-dark" pattern="[A-Za-z]{3,}[A-Za-z\s]*" minlength="3" />
+        <div *ngIf="bankname.invalid && bankname.touched" class="mt-1.5">
+          <small class="text-danger border border-danger px-3 rounded mt-1" *ngIf="bankname.errors?.['required']">Bank
+            Name is required</small>
+          <small class="text-danger border border-danger px-3 rounded mt-1"
+            *ngIf="bankname.errors?.['minlength'] || bankname.errors?.['pattern']">Bank Name should be valid</small>
+        </div>
+      </div>
+      <div class="md:col-span-2 flex gap-3 pt-2">
+        <button type="submit" class="btn-primary" [disabled]="bankAccountForm.invalid">Save Account</button>
+        <button type="button" (click)="showForm = false" class="btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+
+  @if (loading) {
+  <div class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+  } @else if (accounts.length === 0) {
+  <div class="glass-card-static rounded-2xl p-12 text-center animate-fade-in">
+    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+      style="background: rgba(20, 8, 45, 0.8);">
+      <span class="text-3xl">🏦</span>
+    </div>
+    <p class="text-slate-400 font-medium">No bank accounts linked yet</p>
+    <p class="text-slate-500 text-sm mt-1">Add your first bank account to get started</p>
+  </div>
+  } @else {
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    @for (acc of accounts; track acc.bankAccountId; let i = $index) {
+    <div class="glass-card rounded-2xl p-5 animate-slide-up" [style.animation-delay]="(i * 0.05) + 's'">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center"
+          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.1));">
+          <span class="text-xl">🏦</span>
+        </div>
+        <span class="text-xs text-slate-600 font-mono">#{{ acc.bankAccountId }}</span>
+      </div>
+      <p class="font-semibold text-slate-800 text-lg mb-1">{{ acc.bankname }}</p>
+      <p class="text-sm text-slate-400 font-mono mb-0.5">{{ acc.accountNo }}</p>
+      <p class="text-xs text-slate-600 mb-4">IFSC: {{ acc.ifscCode }}</p>
+      <div class="flex items-center gap-2 pt-3" style="border-top: 1px solid rgba(139, 92, 246, 0.08);">
+        <button (click)="openTransfer(acc)" class="btn-accent">Transfer to Wallet</button>
+        <button (click)="deleteAccount(acc.bankAccountId)" class="btn-danger">Delete</button>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Transfer Modal -->
+  @if (transferModal) {
+  <div class="modal-overlay">
+    <form #transferForm=ngForm (ngSubmit)="doTransfer()" class="modal-card">
+      <h3 class="text-lg font-bold text-white mb-1" style="font-family: 'Outfit', sans-serif;">💰 Transfer to Wallet
+      </h3>
+      <p class="text-sm text-slate-400 mb-4">From {{ transferModal.bankname }}</p>
+      <div class="rounded-xl p-3 mb-4 text-sm text-slate-300 font-mono"
+        style="background: rgba(20, 8, 45, 0.8); border: 1px solid rgba(139, 92, 246, 0.1);">
+        {{ transferModal.accountNo }}
+      </div>
+
+      <!-- Quick amount buttons -->
+      <div class="flex gap-2 mb-3">
+        <button type="button" (click)="transferAmount = 500"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹500</button>
+        <button type="button" (click)="transferAmount = 1000"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹1,000</button>
+        <button type="button" (click)="transferAmount = 2000"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹2,000</button>
+        <button type="button" (click)="transferAmount = 5000"
+          class="flex-1 py-2 rounded-lg text-xs font-medium text-slate-300 transition hover:bg-violet-500/15"
+          style="background: rgba(20, 8, 45, 0.6); border: 1px solid rgba(139, 92, 246, 0.1);">₹5,000</button>
+      </div>
+
+      <label class="label">Amount (₹)</label>
+      <input type="number" pattern="[0-9]+" name="transferAmount" id="transferAmount" #transferAmountCtrl="ngModel"
+        [(ngModel)]="transferAmount" min="1" placeholder="Enter amount" class="input-dark mb-4" />
+      <div *ngIf="transferAmountCtrl.invalid && transferAmountCtrl.touched" class="mb-3">
+        <small class="text-danger border border-danger px-3 rounded mt-1"
+          *ngIf="transferAmountCtrl.errors?.['required']">Amount is required</small>
+        <small class="text-danger border border-danger px-3 rounded mt-1"
+          *ngIf="transferAmountCtrl.errors?.['pattern']">Amount should be positive number</small>
+      </div>
+      <div class="flex gap-3">
+        <button type="submit" class="btn-primary flex-1 text-center" [disabled]="transferForm.invalid">Transfer</button>
+        <button type="button" (click)="transferModal = null" class="btn-ghost flex-1 text-center">Cancel</button>
+      </div>
+    </form>
+  </div>
+  }
+</div>

@@ -1,0 +1,60 @@
+# Stage 1: Build the Angular application
+FROM node:20-alpine AS build
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install -g npm@11.13.0
+RUN npm install
+
+# Copy the rest of the application source code
+COPY . .
+
+# Build the Angular application
+RUN npm run build -- --configuration production
+
+# Stage 2: Serve the application with Nginx
+FROM nginx:alpine
+
+# Copy the build output to replace the default nginx contents.
+# Note: Ensure the path matches the 'outputPath' in your angular.json (usually dist/<project-name>)
+COPY --from=build /app/dist/vjpay/browser /usr/share/nginx/html
+
+# Add custom Nginx configuration for Angular routing
+# This ensures that deep links refresh properly without a 404
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    \
+    location /auth/ { \
+        proxy_pass http://backend:8080; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+    } \
+    \
+    location /customers/ { \
+        proxy_pass http://backend:8080; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+    } \
+    \
+    location /api/ { \
+        proxy_pass http://backend:8080; \
+        proxy_set_header Host $host; \
+        proxy_set_header X-Real-IP $remote_addr; \
+    } \
+    \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]

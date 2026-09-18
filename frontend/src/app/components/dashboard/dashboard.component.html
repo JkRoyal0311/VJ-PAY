@@ -1,0 +1,385 @@
+<div>
+  @if (loading) {
+  <div class="flex items-center justify-center h-64">
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-slate-500 text-sm animate-pulse">Loading your dashboard...</p>
+    </div>
+  </div>
+  } @else if (error) {
+  <div class="alert-error">{{ error }}</div>
+  } @else if (customer) {
+
+  <!-- ═══ Greeting ═══ -->
+  <div class="mb-6 animate-slide-up">
+    <p class="text-slate-500 text-sm">Good {{ getGreeting() }},</p>
+    <h1 class="text-3xl font-bold text-indigo-600" style="font-family: 'Outfit', sans-serif;">{{ customer.custName }} 👋
+    </h1>
+  </div>
+
+  <!-- ═══ HERO WALLET CARD ═══ -->
+  <div class="wallet-hero rounded-3xl p-7 mb-8 animate-slide-up stagger-1">
+    <div class="relative z-10">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-violet-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          <span class="text-violet-200 text-sm font-medium">VJ Pay Balance</span>
+        </div>
+        <span class="text-violet-300/60 text-xs font-mono">ID: #{{ customer.wallet.walletId }}</span>
+      </div>
+      <p class="text-5xl font-extrabold text-white tracking-tight mb-1" style="font-family: 'Outfit', sans-serif;">
+        ₹{{ customer.wallet.balance | number:'1.2-2' }}
+      </p>
+      <p class="text-violet-300/70 text-xs mb-5">Available Balance</p>
+      <div class="flex items-center gap-3">
+        <a routerLink="/wallet"
+          class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]">
+          <span>💰</span> View Wallet
+        </a>
+        <a routerLink="/bank-account"
+          class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white/80 text-sm font-medium px-5 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]">
+          <span>🏦</span> Top Up
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ QUICK ACTIONS (PhonePe Grid) ═══ -->
+  <div class="mb-8 animate-slide-up stagger-2">
+    <p class="section-label">
+      <span>💸</span> Money Transfers
+    </p>
+    <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+      <a routerLink="/beneficiary" class="action-tile animate-slide-up stagger-1">
+        <div class="action-icon" style="background: rgba(139, 92, 246, 0.15);">
+          <span>💸</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Send Money</span>
+      </a>
+      <a routerLink="/bank-account" class="action-tile animate-slide-up stagger-2">
+        <div class="action-icon" style="background: rgba(59, 130, 246, 0.15);">
+          <span>🏦</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Bank Transfer</span>
+      </a>
+      <a routerLink="/wallet" class="action-tile animate-slide-up stagger-3">
+        <div class="action-icon" style="background: rgba(16, 185, 129, 0.15);">
+          <span>💰</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">My Wallet</span>
+      </a>
+      <a routerLink="/transactions" class="action-tile animate-slide-up stagger-4">
+        <div class="action-icon" style="background: rgba(6, 182, 212, 0.15);">
+          <span>📊</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">History</span>
+      </a>
+      <a routerLink="/beneficiary" class="action-tile animate-slide-up stagger-5">
+        <div class="action-icon" style="background: rgba(168, 85, 247, 0.15);">
+          <span>👥</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Contacts</span>
+      </a>
+      <a routerLink="/bill-payment" class="action-tile animate-slide-up stagger-6">
+        <div class="action-icon" style="background: rgba(245, 158, 11, 0.15);">
+          <span>📋</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Pay Bills</span>
+      </a>
+      <a routerLink="/wallet" class="action-tile animate-slide-up stagger-7">
+        <div class="action-icon" style="background: rgba(236, 72, 153, 0.15);">
+          <span>🎁</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Rewards</span>
+      </a>
+      <a (click)="showComingSoon = true" class="action-tile animate-slide-up stagger-8">
+        <div class="action-icon" style="background: rgba(99, 102, 241, 0.15);">
+          <span>📌</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">More</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══ RECHARGE & PAY BILLS ═══ -->
+  <div class="mb-8 animate-slide-up stagger-3">
+    <p class="section-label">
+      <span>⚡</span> Recharge & Pay Bills
+    </p>
+    <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <a routerLink="/bill-payment" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(234,88,12,0.2));">
+          <span>⚡</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Electricity</span>
+      </a>
+      <a routerLink="/bill-payment" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(99,102,241,0.2));">
+          <span>📱</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Mobile</span>
+      </a>
+      <a routerLink="/bill-payment" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(244,63,94,0.2), rgba(251,113,133,0.2));">
+          <span>🔥</span>
+        </div>
+        <span class="text-xs font-medium text-slate-300">Gas Cylinder</span>
+      </a>
+      <a (click)="showComingSoon = true" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(34,211,238,0.2));">
+          <span>💧</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-xs font-medium text-slate-300">Water</span>
+          <span class="badge-soon mt-1">Soon</span>
+        </div>
+      </a>
+      <a (click)="showComingSoon = true" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(168,85,247,0.2));">
+          <span>📺</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-xs font-medium text-slate-300">DTH</span>
+          <span class="badge-soon mt-1">Soon</span>
+        </div>
+      </a>
+      <a (click)="showComingSoon = true" class="action-tile">
+        <div class="action-icon"
+          style="background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(52,211,153,0.2));">
+          <span>🌐</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-xs font-medium text-slate-300">Broadband</span>
+          <span class="badge-soon mt-1">Soon</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══ TRAVEL & BOOKING (PhonePe style) ═══ -->
+  <div class="mb-8 animate-slide-up stagger-4">
+    <p class="section-label">
+      <span>✈️</span> Travel & Booking
+    </p>
+    <div class="grid grid-cols-3 lg:grid-cols-3 gap-4">
+      <!-- Bus -->
+      <div class="travel-card group" (click)="showComingSoon = true">
+        <div
+          class="w-16 h-16 mx-auto mb-3 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+          style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.1));">
+          <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M8 17h.01M16 17h.01M5 11h14M5 7h14M6 21h12a2 2 0 002-2V7a4 4 0 00-4-4H8a4 4 0 00-4 4v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-1">Bus Booking</p>
+        <p class="text-slate-500 text-xs mb-2">Book KSRTC, Volvo & more</p>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+      <!-- Flights -->
+      <div class="travel-card group" (click)="showComingSoon = true">
+        <div
+          class="w-16 h-16 mx-auto mb-3 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+          style="background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(99,102,241,0.1));">
+          <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-1">Flight Tickets</p>
+        <p class="text-slate-500 text-xs mb-2">Domestic & International</p>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+      <!-- Trains -->
+      <div class="travel-card group" (click)="showComingSoon = true">
+        <div
+          class="w-16 h-16 mx-auto mb-3 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+          style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(234,88,12,0.1));">
+          <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M9 17h6M9 17l-2 4m8-4l2 4M5 7h14l-1 10H6L5 7zM7 3h10v4H7V3z" />
+          </svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-1">Train Booking</p>
+        <p class="text-slate-500 text-xs mb-2">IRCTC Railway tickets</p>
+        <span class="badge-soon">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Bottom Row: Profile + Promo + Stats ═══ -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-slide-up stagger-5">
+
+    <!-- Profile Card -->
+    <div class="glass-card-static rounded-2xl p-6">
+      <p class="section-label !mb-4"><span>👤</span> Profile</p>
+      <div class="flex items-center gap-4 mb-5">
+        <div
+          class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-xl font-bold text-white flex-shrink-0 shadow-lg shadow-violet-900/30">
+          {{ customer.custName.charAt(0) }}
+        </div>
+        <div>
+          <p class="font-semibold text-slate-800 text-lg">{{ customer.custName }}</p>
+          <p class="text-xs text-violet-600 font-medium">{{ customer.email }}</p>
+        </div>
+      </div>
+      <div class="space-y-2.5 text-sm">
+        <div class="flex justify-between items-center py-2.5 px-3 rounded-lg bg-violet-50/80 border border-violet-100">
+          <span class="text-violet-600 text-xs font-semibold">📱 Mobile</span>
+          <span class="text-slate-800 font-bold text-xs">{{ customer.mobileNumber }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5 px-3 rounded-lg bg-violet-50/80 border border-violet-100">
+          <span class="text-violet-600 text-xs font-semibold">🆔 Customer ID</span>
+          <span class="text-slate-800 font-bold text-xs">#{{ customer.custId }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5 px-3 rounded-lg bg-violet-50/80 border border-violet-100">
+          <span class="text-violet-600 text-xs font-semibold">👥 Beneficiaries</span>
+          <span class="text-violet-400 font-bold text-xs">{{ customer.wallet.beneficiary.length }}</span>
+        </div>
+      </div>
+      <button (click)="showResetPasswordForm()"
+        class="mt-4 w-full btn-ghost !py-2.5 !text-xs flex items-center justify-center gap-2">
+        <span>🔑</span> Change Password
+      </button>
+    </div>
+
+    <!-- Promo Banner -->
+    <div class="lg:col-span-2 promo-banner rounded-2xl p-7 flex items-center relative overflow-hidden">
+      <div class="relative z-10 flex-1">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-2xl">🎉</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-white/60">Exclusive Offer</span>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">Get 5% Cashback</h3>
+        <p class="text-white/70 text-sm mb-4">On your first bill payment via VJ Pay. Use code <span
+            class="font-bold text-white bg-white/15 px-2 py-0.5 rounded">PAYFIRST</span></p>
+        <a routerLink="/bill-payment"
+          class="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all hover:scale-[1.02]">
+          Pay Now →
+        </a>
+      </div>
+      <div class="hidden sm:flex items-center justify-center text-7xl opacity-30 ml-4 animate-bounce-subtle">
+        💸
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Recent Transactions ═══ -->
+  @if (recentTransactions.length > 0) {
+  <div class="mb-6 animate-slide-up stagger-6">
+    <div class="flex items-center justify-between mb-4">
+      <p class="section-label !mb-0"><span>📊</span> Recent Activity</p>
+      <a routerLink="/transactions" class="text-xs text-violet-400 hover:text-violet-300 font-medium transition">View
+        All →</a>
+    </div>
+    <div class="glass-card-static rounded-2xl overflow-hidden">
+      @for (tx of recentTransactions; track tx.transactionId) {
+      <div class="flex items-center gap-4 px-5 py-4 transition hover:bg-violet-500/5"
+        [style.border-bottom]="'1px solid rgba(139, 92, 246, 0.06)'">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          [style.background]="tx.transactionType === 'CREDIT' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)'">
+          <span class="text-lg">{{ tx.transactionType === 'CREDIT' ? '📥' : '📤' }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-white truncate">{{ tx.category === 'BENEFICIARY_TRANSFER' ? 'Money
+            Transfer' : tx.category === 'BILL_PAYMENT' ? 'Bill Payment' : 'Wallet Top Up' }}</p>
+          <p class="text-xs text-slate-500">{{ tx.transactionDate | date:'mediumDate' }}</p>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-sm font-bold" [class.text-emerald-400]="tx.transactionType === 'CREDIT'"
+            [class.text-rose-400]="tx.transactionType === 'DEBIT'">
+            {{ tx.transactionType === 'DEBIT' ? '-' : '+' }}₹{{ tx.transactionAmount | number:'1.2-2' }}
+          </p>
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full"
+            [style.background]="tx.transactionType === 'CREDIT' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)'"
+            [style.color]="tx.transactionType === 'CREDIT' ? '#34d399' : '#fb7185'">
+            {{ tx.transactionStatus }}
+          </span>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  }
+
+  <!-- ═══ Coming Soon Modal ═══ -->
+  @if (showComingSoon) {
+  <div class="modal-overlay" (click)="showComingSoon = false">
+    <div class="modal-card text-center" (click)="$event.stopPropagation()">
+      <div
+        class="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center mx-auto mb-5">
+        <span class="text-4xl">🚀</span>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2" style="font-family: 'Outfit', sans-serif;">Coming Soon!</h3>
+      <p class="text-slate-400 text-sm mb-6">This feature is under development and will be available soon. Stay tuned
+        for updates!</p>
+      <button (click)="showComingSoon = false" class="btn-primary w-full text-center">Got it!</button>
+    </div>
+  </div>
+  }
+
+  <!-- ═══ Reset Password Modal ═══ -->
+  @if (resetPwdForm) {
+  <div class="modal-overlay" (click)="showResetPasswordForm()">
+    <div class="modal-card !max-w-md" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-white" style="font-family: 'Outfit', sans-serif;">Change Password</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Update your account password</p>
+        </div>
+        <button type="button"
+          class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center hover:bg-rose-500/20 transition text-sm font-bold"
+          (click)="showResetPasswordForm()">✕</button>
+      </div>
+
+      <form #resetForm=ngForm (ngSubmit)="resetPassword()" class="space-y-4">
+        <div>
+          <label class="label">Current Password</label>
+          <input type="password" required id="pwd" #pwdCtrl="ngModel" [(ngModel)]="pwd" name="pwd"
+            placeholder="•••••••••••••" class="input-dark" />
+          <div *ngIf="pwdCtrl.invalid && pwdCtrl.touched" class="mt-1.5">
+            <small class="text-danger border border-danger px-3 rounded mt-1"
+              *ngIf="pwdCtrl.errors?.['required']">Password is required</small>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">New Password</label>
+          <input type="password" required id="newPwd" #newPwdCtrl="ngModel" [(ngModel)]="newPwd" name="newPwd"
+            placeholder="•••••••••••••" class="input-dark"
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}" />
+          <div *ngIf="newPwdCtrl.invalid && newPwdCtrl.touched" class="mt-1.5">
+            <small class="text-danger border border-danger px-3 rounded mt-1"
+              *ngIf="newPwdCtrl.errors?.['required']">New Password is required</small>
+            <small class="text-danger border border-danger px-3 rounded mt-1"
+              *ngIf="newPwdCtrl.errors?.['pattern']">Password should have atleast 1 uppercase, 1 lowercase, 1 digit and
+              1 special character</small>
+          </div>
+        </div>
+
+        @if (resetPwdError) {
+        <div class="alert-error">{{ resetPwdError }}</div>
+        }
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="showResetPasswordForm()" class="btn-ghost flex-1 text-center">Cancel</button>
+          <button type="submit" [disabled]="resetForm.invalid || resetPwdLoading"
+            class="btn-primary flex-1 text-center">
+            {{ resetPwdLoading ? 'Updating...' : 'Change Password' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

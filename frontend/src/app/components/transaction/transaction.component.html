@@ -1,0 +1,126 @@
+<div>
+  <div class="mb-8 animate-slide-up">
+    <h1 class="page-title">📊 Transactions</h1>
+    <p class="page-subtitle">Your complete transaction history</p>
+  </div>
+
+  @if (successMsg) { <div class="alert-success animate-slide-down">{{ successMsg }}</div> }
+  @if (error) { <div class="alert-error animate-slide-down">{{ error }}</div> }
+
+  <!-- Filters -->
+  <div class="glass-card-static rounded-2xl p-5 mb-6 animate-slide-up stagger-1">
+    <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color:var(--pw-text-secondary);">🔍 Filters</p>
+    <div class="flex flex-wrap gap-4 items-end">
+      <div>
+        <label class="label">Category</label>
+        <select [(ngModel)]="filterCategory" name="filterCategory" class="input-dark !py-2 !text-sm">
+          <option value="" class="bg-white text-slate-800">All Categories</option>
+          @for (cat of categories; track cat) {
+          <option [value]="cat" class="bg-white text-slate-800">{{ cat }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="label">Sub Category</label>
+        <select [(ngModel)]="filterSubCategory" name="filterSubCategory" class="input-dark !py-2 !text-sm">
+          <option value="" class="bg-white text-slate-800">All Sub Categories</option>
+          @for (cat of subcategories; track cat) {
+          <option [value]="cat" class="bg-white text-slate-800">{{ cat }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="label">From Date</label>
+        <input type="date" [(ngModel)]="filterFrom" name="filterFrom" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div>
+        <label class="label">To Date</label>
+        <input type="date" [(ngModel)]="filterTo" name="filterTo" class="input-dark !py-2 !text-sm" />
+      </div>
+      <div class="flex gap-2">
+        <button (click)="applyFilter()" class="btn-primary !py-2 !px-4 !text-sm">Apply</button>
+        <button (click)="clearFilter()" class="btn-ghost !py-2 !px-4 !text-sm">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+  <div class="flex items-center justify-center h-48">
+    <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+  } @else if (filtered.length === 0) {
+  <div class="glass-card-static rounded-2xl p-12 text-center animate-fade-in">
+    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(20,8,45,0.8);">
+      <span class="text-3xl">📊</span>
+    </div>
+    <p class="text-slate-400 font-medium">No transactions found</p>
+    <p class="text-slate-500 text-sm mt-1">Your transaction history will appear here</p>
+  </div>
+  } @else {
+  <div class="glass-card-static rounded-2xl overflow-hidden animate-fade-in">
+    <div class="px-6 py-4" style="border-bottom:1px solid rgba(139,92,246,0.08);">
+      <p class="text-sm font-semibold text-white">{{ filtered.length }} transaction{{ filtered.length === 1 ? '' : 's' }}</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr style="border-bottom:1px solid rgba(139,92,246,0.08);">
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">ID</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Type</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Amount</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Category</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Status</th>
+            <th class="text-left px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Date</th>
+            <th class="text-right px-6 py-4 text-xs font-semibold uppercase tracking-wider" style="color:var(--pw-text-muted);">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tx of filtered; track tx.transactionId) {
+          <tr class="hover:bg-violet-500/5 transition" style="border-bottom:1px solid rgba(139,92,246,0.04);">
+            <td class="px-6 py-4 text-slate-500 font-mono text-xs">#{{ tx.transactionId }}</td>
+            <td class="px-6 py-4">
+              <span [class]="txTypeBadge(tx.transactionType)">{{ tx.transactionType }}</span>
+            </td>
+            <td class="px-6 py-4 font-bold" [class.text-emerald-400]="tx.transactionType === 'CREDIT'"
+              [class.text-rose-400]="tx.transactionType === 'DEBIT'"
+              [class.text-white]="tx.transactionType !== 'CREDIT' && tx.transactionType !== 'DEBIT'">
+              {{ tx.transactionType === 'DEBIT' ? '-' : '+' }}₹{{ tx.transactionAmount | number:'1.2-2' }}
+            </td>
+            <td class="px-6 py-4 text-xs text-slate-400">{{ tx.category }}</td>
+            <td class="px-6 py-4">
+              <span class="text-xs font-medium px-2.5 py-1 rounded-full" style="background:rgba(16,185,129,0.1); color:#34d399; border:1px solid rgba(16,185,129,0.2);">
+                {{ tx.transactionStatus }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-slate-500 text-xs">{{ tx.transactionDate | date:'mediumDate' }}</td>
+            <td class="px-6 py-4 text-right">
+              <button (click)="fetchSingleTransaction(tx)" class="btn-info">View</button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  @if (showSingleTransaction) {
+  <div class="modal-overlay" (click)="closeSingleTransaction()">
+    <div class="modal-card !max-w-xl" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-white" style="font-family:'Outfit',sans-serif;">📊 Transaction Details</h3>
+        <button class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center hover:bg-rose-500/20 transition text-sm font-bold" (click)="closeSingleTransaction()">✕</button>
+      </div>
+      <div class="space-y-2">
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Type</span><span class="text-white text-sm font-medium">{{singleTransaction.transactionType}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Status</span><span class="text-emerald-400 text-sm font-medium">{{singleTransaction.transactionStatus}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Amount</span><span class="text-white text-sm font-bold">₹{{singleTransaction.transactionAmount}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Category</span><span class="text-white text-sm">{{singleTransaction.category}}</span></div>
+        <div *ngIf="singleTransaction.subCategory =='ELECTRICITY' || singleTransaction.subCategory == 'MOBILE_RECHARGE' || singleTransaction.subCategory == 'GAS'" class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Sub Category</span><span class="text-white text-sm">{{singleTransaction.subCategory}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Description</span><span class="text-white text-sm">{{singleTransaction.description}}</span></div>
+        <div class="flex justify-between py-2.5 px-3 rounded-lg" style="background:rgba(20,8,45,0.5);"><span class="text-slate-500 text-sm">Date</span><span class="text-white text-sm">{{singleTransaction.transactionDate | date:'mediumDate'}}</span></div>
+      </div>
+    </div>
+  </div>
+  }
+</div>

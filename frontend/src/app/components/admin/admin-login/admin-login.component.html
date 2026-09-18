@@ -1,0 +1,23 @@
+<div class="min-h-screen flex items-center justify-center relative overflow-hidden" style="background: var(--pw-bg);">
+  <div class="antigravity-bg"><div class="shape shape-1"></div><div class="shape shape-2"></div><div class="shape shape-3"></div><div class="shape shape-4"></div><div class="shape shape-5"></div></div>
+  <div class="relative w-full max-w-md px-4 z-10">
+    <div class="card-static rounded-3xl p-8 animate-fade-in-scale" style="box-shadow: var(--pw-shadow-lg);">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#e17055] to-[#d63031] flex items-center justify-center shadow-lg mb-4" style="box-shadow: 0 6px 20px rgba(225,112,85,0.3);">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h1 class="text-2xl font-bold" style="font-family: 'Outfit', sans-serif;">Admin Portal</h1>
+        <p class="text-sm mt-1" style="color: var(--pw-text-secondary);">Sign in with admin credentials</p>
+      </div>
+      <form (ngSubmit)="onSubmit()" class="space-y-5">
+        <div><label class="label">Email address</label><div class="relative"><div class="absolute left-4 top-1/2 -translate-y-1/2" style="color: var(--pw-text-muted);"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div><input type="email" [(ngModel)]="email" name="email" placeholder="admin@example.com" class="input-dark !pl-11" /></div></div>
+        <div><label class="label">Password</label><div class="relative"><div class="absolute left-4 top-1/2 -translate-y-1/2" style="color: var(--pw-text-muted);"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><input type="password" [(ngModel)]="pwd" name="pwd" placeholder="••••••••" class="input-dark !pl-11" /></div></div>
+        @if (error) { <div class="alert-error">{{ error }}</div> }
+        <button type="submit" [disabled]="loading" class="w-full font-semibold py-3 rounded-xl text-white transition-all duration-200 shadow-lg disabled:opacity-50" style="background: linear-gradient(135deg, #e17055, #d63031); box-shadow: 0 4px 15px rgba(225,112,85,0.3);">
+          <span class="flex items-center justify-center gap-2">@if (loading) { <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> }{{ loading ? 'Signing in...' : 'Sign In as Admin' }}</span>
+        </button>
+      </form>
+      <p class="text-center text-sm mt-6" style="color: var(--pw-text-secondary);">Customer login? <a routerLink="/login" class="font-semibold ml-1" style="color: var(--pw-accent);">Go here</a></p>
+    </div>
+  </div>
+</div>
