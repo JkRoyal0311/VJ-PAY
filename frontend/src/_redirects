@@ -1,0 +1,4 @@
+/auth/*  https://vjpay-backend.onrender.com/auth/:splat  200
+/customers/*  https://vjpay-backend.onrender.com/customers/:splat  200
+/api/*  https://vjpay-backend.onrender.com/api/:splat  200
+/*  /index.html  200

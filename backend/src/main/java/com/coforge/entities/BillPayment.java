@@ -40,7 +40,7 @@ public class BillPayment {
 	private BillType billType;
 	
 	@JdbcTypeCode(SqlTypes.JSON)
-	@Column(columnDefinition = "json")
+	@Column(columnDefinition = "jsonb")
 	@NotEmpty
 	private Map<String, Object> billData;
 	

@@ -19,5 +19,21 @@ COPY --from=build /app/target/*.war app.jar
 # Expose port 8080
 EXPOSE 8080
 
+# Startup script: Convert Render's DATABASE_URL (postgres://user:pass@host/db)
+# to Spring Boot's JDBC format (jdbc:postgresql://host/db) and set credentials
+COPY <<'EOF' /app/start.sh
+#!/bin/sh
+if [ -n "$DATABASE_URL" ]; then
+  # Extract components from DATABASE_URL
+  SPRING_DATASOURCE_URL="jdbc:postgresql://$(echo $DATABASE_URL | sed -E 's|^postgres(ql)?://[^@]+@||')"
+  SPRING_DATASOURCE_USERNAME="$(echo $DATABASE_URL | sed -E 's|^postgres(ql)?://([^:]+):.*|\2|')"
+  SPRING_DATASOURCE_PASSWORD="$(echo $DATABASE_URL | sed -E 's|^postgres(ql)?://[^:]+:([^@]+)@.*|\2|')"
+  export SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD
+fi
+exec java -jar app.jar
+EOF
+RUN chmod +x /app/start.sh
+
 # Command to run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/app/start.sh"]
+

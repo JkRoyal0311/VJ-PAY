@@ -1,0 +1,39 @@
+# Render Blueprint — One-click deployment for VJ Pay
+# https://render.com/docs/blueprint-spec
+
+databases:
+  - name: vjpay-db
+    plan: free
+    databaseName: paymentdb
+    user: vjpay
+
+services:
+  # -----------------------------------------------
+  # Backend — Spring Boot (Docker)
+  # -----------------------------------------------
+  - type: web
+    name: vjpay-backend
+    plan: free
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile.backend
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vjpay-db
+          property: connectionURI
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /auth/health
+
+  # -----------------------------------------------
+  # Frontend — Angular (Static Site)
+  # -----------------------------------------------
+  - type: web
+    name: vjpay-frontend
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build -- --configuration production
+    staticPublishPath: ./frontend/dist/vjpay/browser
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

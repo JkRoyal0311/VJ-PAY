@@ -1,6 +1,6 @@
 -- ==========================================================
 -- V1__initial_schema.sql
--- Initial database schema migration for VJ-PAY
+-- Initial database schema migration for VJ-PAY (PostgreSQL)
 -- Generated based on JPA Entity definitions:
 --   - Wallet (com.coforge.entities.Wallet)
 --   - Customer (com.coforge.entities.Customer)
@@ -12,115 +12,94 @@
 
 -- ----------------------------------------------------------
 -- 1. Table: wallet
--- Entity: com.coforge.entities.Wallet
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS wallet (
-    wallet_id BIGINT NOT NULL AUTO_INCREMENT,
-    balance DECIMAL(38, 2) NOT NULL,
-    PRIMARY KEY (wallet_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    wallet_id BIGSERIAL PRIMARY KEY,
+    balance DECIMAL(38, 2) NOT NULL
+);
 
 -- ----------------------------------------------------------
 -- 2. Table: customers
--- Entity: com.coforge.entities.Customer
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS customers (
-    cust_id BIGINT NOT NULL AUTO_INCREMENT,
+    cust_id BIGSERIAL PRIMARY KEY,
     role VARCHAR(255) DEFAULT 'USER',
     cust_name VARCHAR(255) NOT NULL,
     mobile_number VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     pwd VARCHAR(255) NOT NULL,
     wallet_id BIGINT,
-    PRIMARY KEY (cust_id),
-    UNIQUE KEY uk_customers_mobile_number (mobile_number),
-    UNIQUE KEY uk_customers_email (email),
-    UNIQUE KEY uk_customers_wallet_id (wallet_id),
+    CONSTRAINT uk_customers_mobile_number UNIQUE (mobile_number),
+    CONSTRAINT uk_customers_email UNIQUE (email),
+    CONSTRAINT uk_customers_wallet_id UNIQUE (wallet_id),
     CONSTRAINT fk_customers_wallet FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- ----------------------------------------------------------
 -- 3. Table: beneficiary
--- Entity: com.coforge.entities.Beneficiary
--- Target of Wallet's @OneToMany @JoinColumn(name = "wallet_id")
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS beneficiary (
-    beneficiary_id BIGINT NOT NULL AUTO_INCREMENT,
+    beneficiary_id BIGSERIAL PRIMARY KEY,
     beneficiary_name VARCHAR(255) NOT NULL,
     mobile_number VARCHAR(255),
     wallet_id BIGINT,
-    PRIMARY KEY (beneficiary_id),
-    KEY idx_beneficiary_wallet_id (wallet_id),
     CONSTRAINT fk_beneficiary_wallet FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
+CREATE INDEX IF NOT EXISTS idx_beneficiary_wallet_id ON beneficiary (wallet_id);
 
 -- ----------------------------------------------------------
 -- 4. Table: bank_account
--- Entity: com.coforge.entities.BankAccount
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS bank_account (
-    bank_account_id BIGINT NOT NULL AUTO_INCREMENT,
+    bank_account_id BIGSERIAL PRIMARY KEY,
     account_no VARCHAR(255) NOT NULL,
     ifsc_code VARCHAR(255) NOT NULL,
     bankname VARCHAR(255) NOT NULL,
-    balance DOUBLE NOT NULL,
+    balance DOUBLE PRECISION NOT NULL,
     customer_id BIGINT,
-    PRIMARY KEY (bank_account_id),
-    KEY idx_bank_account_customer_id (customer_id),
     CONSTRAINT fk_bank_account_customer FOREIGN KEY (customer_id) REFERENCES customers (cust_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
+CREATE INDEX IF NOT EXISTS idx_bank_account_customer_id ON bank_account (customer_id);
 
 -- ----------------------------------------------------------
 -- 5. Table: transaction
--- Entity: com.coforge.entities.Transaction
--- Enums: TransactionCategory, TransactionSubCategory (STRING)
+-- Note: "transaction" is a reserved word in PostgreSQL, so we quote it
 -- ----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transaction` (
-    transaction_id BIGINT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS "transaction" (
+    transaction_id BIGSERIAL PRIMARY KEY,
     transaction_type VARCHAR(255) NOT NULL,
     transaction_status VARCHAR(255) NOT NULL,
-    transaction_amount DOUBLE NOT NULL,
+    transaction_amount DOUBLE PRECISION NOT NULL,
     transaction_date DATE NOT NULL,
     cust_id BIGINT,
     description VARCHAR(255),
     category VARCHAR(255),
     sub_category VARCHAR(255),
-    PRIMARY KEY (transaction_id),
-    KEY idx_transaction_cust_id (cust_id),
     CONSTRAINT fk_transaction_customer FOREIGN KEY (cust_id) REFERENCES customers (cust_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
+CREATE INDEX IF NOT EXISTS idx_transaction_cust_id ON "transaction" (cust_id);
 
 -- ----------------------------------------------------------
 -- 6. Table: bill_payment
--- Entity: com.coforge.entities.BillPayment
--- Enum: BillType (ORDINAL -> SMALLINT)
 -- ----------------------------------------------------------
 CREATE TABLE IF NOT EXISTS bill_payment (
-    bill_id BIGINT NOT NULL AUTO_INCREMENT,
-    payment_date DATETIME(6),
-    amount DOUBLE NOT NULL,
+    bill_id BIGSERIAL PRIMARY KEY,
+    payment_date TIMESTAMP,
+    amount DOUBLE PRECISION NOT NULL,
     bill_type SMALLINT NOT NULL,
-    bill_data JSON NOT NULL,
+    bill_data JSONB NOT NULL,
     wallet_id BIGINT,
-    PRIMARY KEY (bill_id),
-    KEY idx_bill_payment_wallet_id (wallet_id),
     CONSTRAINT fk_bill_payment_wallet FOREIGN KEY (wallet_id) REFERENCES wallet (wallet_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
+
+CREATE INDEX IF NOT EXISTS idx_bill_payment_wallet_id ON bill_payment (wallet_id);
 
 -- ----------------------------------------------------------
--- 7. Sequence tables for GenerationType.AUTO
--- Required by Hibernate 6 MySQL Dialect when AUTO strategy is used
+-- 7. Sequences for GenerationType.AUTO entities
+-- PostgreSQL uses native SEQUENCE objects instead of MySQL's table-based sequences
 -- ----------------------------------------------------------
-CREATE TABLE IF NOT EXISTS beneficiary_seq (
-    next_val BIGINT
-) ENGINE=InnoDB;
-
-INSERT INTO beneficiary_seq (next_val)
-SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM beneficiary_seq);
-
-CREATE TABLE IF NOT EXISTS transaction_seq (
-    next_val BIGINT
-) ENGINE=InnoDB;
-
-INSERT INTO transaction_seq (next_val)
-SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM transaction_seq);
+CREATE SEQUENCE IF NOT EXISTS beneficiary_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS transaction_seq START WITH 1 INCREMENT BY 50;

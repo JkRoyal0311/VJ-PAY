@@ -23,7 +23,8 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              { "glob": "**/*", "input": "public" }
+              { "glob": "**/*", "input": "public" },
+              { "glob": "_redirects", "input": "src" }
             ],
             "styles": ["src/styles.css"],
             "scripts": []
