@@ -31,7 +31,6 @@ services:
   # -----------------------------------------------
   - type: web
     name: vjpay-frontend
-    plan: free
     env: static
     buildCommand: |
       cd frontend
